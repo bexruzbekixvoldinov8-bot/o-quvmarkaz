@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Markaz Platformasi</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0b12;--surface:#13131f;--surface2:#1a1a2a;--border:rgba(255,255,255,0.07);
+  --purple:#5b4fcf;--purple-l:#7b6fe8;--gold:#f5c842;
+  --director:#a04030;--reception:#936c22;--teacher:#1e7055;--student:#245299;
+  --text:#f0f0fa;--muted:rgba(240,240,250,0.55);
+  --radius:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex}
+/* sidebar */
+.sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo{padding:28px 20px 20px;font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);border-bottom:1px solid var(--border)}
+.logo span{color:var(--purple-l)}
+.nav{padding:16px 10px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:0.87rem;color:var(--muted);transition:.15s;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text)}
+.nav-item.active{background:var(--purple);color:#fff}
+.nav-item .icon{font-size:1rem;width:20px;text-align:center}
+.user-info{padding:16px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--muted)}
+.user-info .name{color:var(--text);font-weight:600;margin-bottom:2px}
+.user-info .role-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.rb-director{background:#7a3020;color:#ffb4a2}
+.rb-reception{background:#6a4c10;color:#ffd580}
+.rb-teacher{background:#155040;color:#7effd4}
+.rb-student{background:#143460;color:#7eb8ff}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:18px 28px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:0.83rem;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.btn-primary{background:var(--purple);color:#fff}
+.btn-primary:hover{background:var(--purple-l)}
+.btn-danger{background:#7a3020;color:#fff}
+.btn-sm{padding:5px 10px;font-size:0.76rem}
+.content{flex:1;padding:28px;overflow-y:auto}
+/* cards */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.15}
+.stat-card.purple::before{background:var(--purple)}
+.stat-card.gold::before{background:var(--gold)}
+.stat-card.green::before{background:#1e7055}
+.stat-card.red::before{background:#a04030}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:4px}
+.stat-label{font-size:0.78rem;color:var(--muted)}
+/* table */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.table-head h3{font-family:'Sora',sans-serif;font-size:0.95rem;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:0.84rem}
+th{padding:11px 16px;text-align:left;font-size:0.73rem;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:11px 16px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.025)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:.03em}
+.badge-green{background:rgba(30,112,85,.25);color:#5effc4}
+.badge-red{background:rgba(160,64,48,.25);color:#ff9a8a}
+.badge-yellow{background:rgba(245,200,66,.15);color:var(--gold)}
+/* form */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:28px;width:min(480px,95vw);max-height:90vh;overflow-y:auto}
+.modal h2{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:0.78rem;color:var(--muted);margin-bottom:5px}
+.form-group input,.form-group select{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;padding:9px 13px;color:var(--text);font-size:0.87rem;outline:none;transition:.15s}
+.form-group input:focus,.form-group select:focus{border-color:var(--purple)}
+.form-group select option{background:#1a1a2a}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+/* login page */
+.login-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;align-items:center;justify-content:center}
+.login-page.show{display:flex}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:min(420px,95vw)}
+.login-box h1{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:6px}
+.login-box p{color:var(--muted);font-size:0.85rem;margin-bottom:28px}
+.tab-switch{display:flex;background:rgba(255,255,255,0.05);border-radius:8px;padding:3px;margin-bottom:22px}
+.tab-switch button{flex:1;padding:8px;border:none;border-radius:6px;background:transparent;color:var(--muted);font-size:0.83rem;font-weight:600;cursor:pointer;transition:.15s}
+.tab-switch button.active{background:var(--purple);color:#fff}
+.alert{padding:10px 14px;border-radius:8px;font-size:0.82rem;margin-bottom:14px;display:none}
+.alert.show{display:block}
+.alert-err{background:rgba(160,64,48,.25);color:#ff9a8a;border:1px solid rgba(160,64,48,.4)}
+.alert-ok{background:rgba(30,112,85,.25);color:#5effc4;border:1px solid rgba(30,112,85,.3)}
+/* page sections */
+.page{display:none}
+.page.active{display:block}
+/* notification dot */
+.notif-dot{width:8px;height:8px;border-radius:50%;background:#f55;margin-left:auto}
+/* responsive */
+@media(max-width:700px){
+  .sidebar{display:none}
+  .stat-num{font-size:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="login-page show" id="loginPage">
+  <div class="login-box">
+    <h1>Markaz Platformasi 🎓</h1>
+    <p>O'quv markazi boshqaruv tizimiga xush kelibsiz</p>
+    <div class="tab-switch">
+      <button class="active" onclick="switchTab('login')">Kirish</button>
+      <button onclick="switchTab('register')">Ro'yxatdan o'tish</button>
+    </div>
+    <div class="alert alert-err" id="loginAlert"></div>
+    <div class="alert alert-ok"  id="loginOk"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group"><label>Telefon raqam</label><input id="loginPhone" placeholder="+998901234567"/></div>
+      <div class="form-group"><label>Parol</label><input type="password" id="loginPass" placeholder="Parol"/></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()">Kirish</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none">
+      <div class="form-group"><label>Markaz nomi</label><input id="regName" placeholder="ABC O'quv markazi"/></div>
+      <div class="form-group"><label>Telefon raqam</label><input id="regPhone" placeholder="+998901234567"/></div>
+      <div class="form-group"><label>Parol</label><input type="password" id="regPass" placeholder="Parol o'ylab toping"/></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" onclick="doRegister()">Ro'yxatdan o'tish</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="logo">Markaz<span>Pro</span></div>
+  <nav class="nav" id="navMenu"></nav>
+  <div class="user-info" id="userInfo"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="pageTitle">Dashboard</h1>
+    <button class="btn btn-danger btn-sm" onclick="logout()">🚪 Chiqish</button>
+  </div>
+  <div class="content" id="mainContent">
+    <!-- Pages injected here -->
+    <div class="page active" id="page-dashboard"></div>
+    <div class="page" id="page-teachers"></div>
+    <div class="page" id="page-students"></div>
+    <div class="page" id="page-groups"></div>
+    <div class="page" id="page-payments"></div>
+    <div class="page" id="page-attendance"></div>
+    <div class="page" id="page-grades"></div>
+    <div class="page" id="page-notifications"></div>
+    <div class="page" id="page-profile"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Modal</h2>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn" style="background:rgba(255,255,255,0.08)" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="modalConfirmBtn" onclick="modalConfirm()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let token = '', userRole = '', userName = '', centerId = null;
+let modalConfirmFn = null;
+
+// ── AUTH ──────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+  document.querySelectorAll('.tab-switch button').forEach((b,i) => {
+    b.classList.toggle('active', (tab==='login' && i===0)||(tab==='register' && i===1));
+  });
+}
+
+async function doLogin() {
+  const phone = document.getElementById('loginPhone').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const res = await fetch(`${API}/api/auth/login`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({phone, password})
+  });
+  const data = await res.json();
+  if (!res.ok) return showLoginAlert(data.detail || 'Xato', false);
+  applyLogin(data);
+}
+
+async function doRegister() {
+  const name     = document.getElementById('regName').value.trim();
+  const phone    = document.getElementById('regPhone').value.trim();
+  const password = document.getElementById('regPass').value;
+  const res = await fetch(`${API}/api/auth/register-center`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name, phone, password})
+  });
+  const data = await res.json();
+  if (!res.ok) return showLoginAlert(data.detail || 'Xato', false);
+  showLoginAlert("Muvaffaqiyatli ro'yxatdan o'tdingiz! Endi kiring.", true);
+  applyLogin(data);
+}
+
+function applyLogin(data) {
+  token     = data.access_token;
+  userRole  = data.role;
+  userName  = data.full_name || 'Foydalanuvchi';
+  centerId  = data.center_id;
+  document.getElementById('loginPage').classList.remove('show');
+  buildNav();
+  buildUserInfo();
+  navigateTo('dashboard');
+}
+
+function showLoginAlert(msg, ok) {
+  const el = document.getElementById(ok ? 'loginOk' : 'loginAlert');
+  const bad = document.getElementById(ok ? 'loginAlert' : 'loginOk');
+  bad.classList.remove('show');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function logout() {
+  token = ''; userRole = ''; userName = ''; centerId = null;
+  document.getElementById('loginPage').classList.add('show');
+}
+
+// ── NAV ──────────────────────────────────────────
+const NAV_MAP = {
+  director:  [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'teachers',icon:'👨‍🏫',label:'O\'qituvchilar'},{id:'students',icon:'👨‍🎓',label:'O\'quvchilar'},{id:'groups',icon:'📚',label:'Guruhlar'},{id:'payments',icon:'💳',label:'To\'lovlar'},{id:'notifications',icon:'🔔',label:'Bildirishnomalar'}],
+  reception: [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'students',icon:'👨‍🎓',label:'O\'quvchilar'},{id:'groups',icon:'📚',label:'Guruhlar'},{id:'payments',icon:'💳',label:'To\'lovlar'},{id:'notifications',icon:'🔔',label:'Bildirishnomalar'}],
+  teacher:   [{id:'dashboard',icon:'📊',label:'Dashboard'},{id:'attendance',icon:'✅',label:'Davomat'},{id:'grades',icon:'📝',label:'Baholar'}],
+  student:   [{id:'profile',icon:'👤',label:'Profilim'},{id:'attendance',icon:'✅',label:'Davomatim'},{id:'grades',icon:'📝',label:'Baholarim'},{id:'payments',icon:'💳',label:'To\'lovlarim'}],
+};
+
+function buildNav() {
+  const items = NAV_MAP[userRole] || NAV_MAP.student;
+  document.getElementById('navMenu').innerHTML = items.map(it =>
+    `<div class="nav-item" data-id="${it.id}" onclick="navigateTo('${it.id}')">
+       <span class="icon">${it.icon}</span>${it.label}
+     </div>`
+  ).join('');
+}
+
+function buildUserInfo() {
+  const roleLabel = {director:'Director',reception:'Resepshon',teacher:'Teacher',student:'Student'}[userRole] || userRole;
+  document.getElementById('userInfo').innerHTML =
+    `<div class="name">${userName}</div>
+     <span class="role-badge rb-${userRole}">${roleLabel}</span>`;
+}
+
+function navigateTo(id) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById(`page-${id}`);
+  if (pg) pg.classList.add('active');
+  const labels = {dashboard:'Dashboard',teachers:"O'qituvchilar",students:"O'quvchilar",groups:'Guruhlar',payments:"To'lovlar",attendance:'Davomat',grades:'Baholar',notifications:'Bildirishnomalar',profile:'Profilim'};
+  document.getElementById('pageTitle').textContent = labels[id] || id;
+  loadPage(id);
+}
+
+// ── PAGES ─────────────────────────────────────────
+async function loadPage(id) {
+  const el = document.getElementById(`page-${id}`);
+  if (!el) return;
+
+  if (id === 'dashboard')     await loadDashboard(el);
+  else if (id === 'teachers') await loadTeachers(el);
+  else if (id === 'students') await loadStudents(el);
+  else if (id === 'groups')   await loadGroups(el);
+  else if (id === 'payments') await loadPayments(el);
+  else if (id === 'attendance') await loadAttendance(el);
+  else if (id === 'grades')   await loadGrades(el);
+  else if (id === 'notifications') await loadNotifications(el);
+  else if (id === 'profile')  await loadProfile(el);
+}
+
+async function apiFetch(url, opts={}) {
+  const res = await fetch(API + url, {
+    ...opts,
+    headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...(opts.headers||{})}
+  });
+  if (!res.ok) { const d=await res.json(); throw new Error(d.detail||'Xato'); }
+  return res.json();
+}
+
+// Dashboard
+async function loadDashboard(el) {
+  if (userRole === 'director') {
+    try {
+      const d = await apiFetch('/api/directors/dashboard');
+      el.innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-card purple"><div class="stat-num">${d.teachers}</div><div class="stat-label">O'qituvchilar</div></div>
+          <div class="stat-card green"><div class="stat-num">${d.students}</div><div class="stat-label">O'quvchilar</div></div>
+          <div class="stat-card gold"><div class="stat-num">${d.total_income.toLocaleString()} so'm</div><div class="stat-label">Jami daromad</div></div>
+        </div>
+        <p style="color:var(--muted);font-size:.85rem">Markaz: <b style="color:var(--text)">${d.center_name}</b></p>`;
+    } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+  } else if (userRole === 'teacher') {
+    try {
+      const groups = await apiFetch('/api/teachers/my-groups');
+      el.innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-card purple"><div class="stat-num">${groups.length}</div><div class="stat-label">Mening guruhlarim</div></div>
+        </div>
+        <div class="table-wrap"><div class="table-head"><h3>Guruhlar</h3></div>
+        <table><thead><tr><th>Nomi</th><th>Kurs</th><th>Jadval</th></tr></thead>
+        <tbody>${groups.map(g=>`<tr><td>${g.name}</td><td>${g.course}</td><td>${g.schedule}</td></tr>`).join('')}</tbody>
+        </table></div>`;
+    } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+  } else {
+    el.innerHTML = `<p style="color:var(--muted);font-size:.9rem">Xush kelibsiz, <b style="color:var(--text)">${userName}</b>!</p>`;
+  }
+}
+
+// Teachers
+async function loadTeachers(el) {
+  try {
+    const list = await apiFetch('/api/directors/teachers');
+    el.innerHTML = `
+      <div class="table-wrap">
+        <div class="table-head"><h3>O'qituvchilar</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddTeacher()">+ Qo'shish</button>
+        </div>
+        <table><thead><tr><th>Ism</th><th>Telefon</th><th>Holat</th><th>Amal</th></tr></thead>
+        <tbody>${list.map(t=>`
+          <tr>
+            <td>${t.full_name}</td><td>${t.phone}</td>
+            <td><span class="badge ${t.is_active?'badge-green':'badge-red'}">${t.is_active?'Faol':'Nofaol'}</span></td>
+            <td><button class="btn btn-danger btn-sm" onclick="deleteTeacher(${t.id})">O'chirish</button></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+}
+
+function openAddTeacher() {
+  openModal("Yangi o'qituvchi qo'shish",
+    `<div class="form-group"><label>Ism Familiya</label><input id="mFullName" placeholder="Ali Valiyev"/></div>
+     <div class="form-group"><label>Telefon</label><input id="mPhone" placeholder="+998901234567"/></div>
+     <div class="form-group"><label>Parol</label><input type="password" id="mPass" placeholder="Parol"/></div>`,
+    async () => {
+      await apiFetch('/api/auth/create-user', {method:'POST', body: JSON.stringify({
+        full_name: document.getElementById('mFullName').value,
+        phone:     document.getElementById('mPhone').value,
+        password:  document.getElementById('mPass').value,
+        role: 'teacher', center_id: centerId
+      })});
+      closeModal(); loadPage('teachers');
+    }
+  );
+}
+
+async function deleteTeacher(id) {
+  if (!confirm("O'chirmoqchimisiz?")) return;
+  try { await apiFetch(`/api/directors/teachers/${id}`, {method:'DELETE'}); loadPage('teachers'); }
+  catch(e) { alert(e.message); }
+}
+
+// Students
+async function loadStudents(el) {
+  try {
+    const list = await apiFetch('/api/students/all');
+    el.innerHTML = `
+      <div class="table-wrap">
+        <div class="table-head"><h3>O'quvchilar</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddStudent()">+ Qo'shish</button>
+        </div>
+        <table><thead><tr><th>Ism</th><th>Telefon</th><th>Holat</th></tr></thead>
+        <tbody>${list.map(s=>`
+          <tr><td>${s.full_name}</td><td>${s.phone}</td>
+          <td><span class="badge ${s.is_active?'badge-green':'badge-red'}">${s.is_active?'Faol':'Nofaol'}</span></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+}
+
+function openAddStudent() {
+  openModal("Yangi o'quvchi qo'shish",
+    `<div class="form-group"><label>Ism Familiya</label><input id="mFullName" placeholder="Dilnoza Karimova"/></div>
+     <div class="form-group"><label>Telefon</label><input id="mPhone" placeholder="+998901234567"/></div>
+     <div class="form-group"><label>Parol</label><input type="password" id="mPass" placeholder="Parol"/></div>`,
+    async () => {
+      await apiFetch('/api/auth/create-user', {method:'POST', body: JSON.stringify({
+        full_name: document.getElementById('mFullName').value,
+        phone:     document.getElementById('mPhone').value,
+        password:  document.getElementById('mPass').value,
+        role: 'student', center_id: centerId
+      })});
+      closeModal(); loadPage('students');
+    }
+  );
+}
+
+// Groups
+async function loadGroups(el) {
+  try {
+    const list = await apiFetch('/api/groups/');
+    el.innerHTML = `
+      <div class="table-wrap">
+        <div class="table-head"><h3>Guruhlar</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddGroup()">+ Yangi guruh</button>
+        </div>
+        <table><thead><tr><th>Nomi</th><th>Kurs</th><th>Jadval</th><th>Narx</th></tr></thead>
+        <tbody>${list.map(g=>`
+          <tr><td>${g.name}</td><td>${g.course}</td><td>${g.schedule}</td><td>${g.price.toLocaleString()} so'm</td></tr>`).join('')}
+        </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+}
+
+function openAddGroup() {
+  openModal("Yangi guruh yaratish",
+    `<div class="form-group"><label>Guruh nomi</label><input id="gName" placeholder="Ingliz tili - A1"/></div>
+     <div class="form-group"><label>Kurs</label><input id="gCourse" placeholder="Ingliz tili"/></div>
+     <div class="form-group"><label>Jadval</label><input id="gSched" placeholder="Du,Cho,Ju 10:00"/></div>
+     <div class="form-group"><label>Oylik to'lov (so'm)</label><input type="number" id="gPrice" placeholder="500000"/></div>`,
+    async () => {
+      await apiFetch('/api/groups/', {method:'POST', body: JSON.stringify({
+        name:     document.getElementById('gName').value,
+        course:   document.getElementById('gCourse').value,
+        schedule: document.getElementById('gSched').value,
+        price:    parseFloat(document.getElementById('gPrice').value) || 0
+      })});
+      closeModal(); loadPage('groups');
+    }
+  );
+}
+
+// Payments
+async function loadPayments(el) {
+  if (userRole === 'student') {
+    try {
+      const list = await apiFetch('/api/students/my-payments');
+      el.innerHTML = `<div class="table-wrap">
+        <div class="table-head"><h3>Mening to'lovlarim</h3></div>
+        <table><thead><tr><th>Miqdor</th><th>Oy</th><th>Usul</th><th>Sana</th></tr></thead>
+        <tbody>${list.map(p=>`<tr><td>${p.amount.toLocaleString()} so'm</td><td>${p.month}</td><td>${p.method}</td><td>${p.paid_at.slice(0,10)}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+    return;
+  }
+  try {
+    const list = await apiFetch('/api/payments/');
+    el.innerHTML = `
+      <div class="table-wrap">
+        <div class="table-head"><h3>To'lovlar</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddPayment()">+ To'lov qo'shish</button>
+        </div>
+        <table><thead><tr><th>Student ID</th><th>Miqdor</th><th>Oy</th><th>Usul</th></tr></thead>
+        <tbody>${list.map(p=>`
+          <tr><td>#${p.student_id}</td><td>${p.amount.toLocaleString()} so'm</td><td>${p.month}</td><td>${p.method}</td></tr>`).join('')}
+        </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+}
+
+function openAddPayment() {
+  const now = new Date(); const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  openModal("To'lov qo'shish",
+    `<div class="form-group"><label>Student ID</label><input type="number" id="pStud" placeholder="1"/></div>
+     <div class="form-group"><label>Miqdor (so'm)</label><input type="number" id="pAmt" placeholder="500000"/></div>
+     <div class="form-group"><label>Oy</label><input id="pMonth" value="${month}" placeholder="2025-05"/></div>
+     <div class="form-group"><label>Usul</label>
+       <select id="pMethod"><option>cash</option><option>card</option><option>click</option><option>payme</option></select>
+     </div>`,
+    async () => {
+      await apiFetch('/api/payments/', {method:'POST', body: JSON.stringify({
+        student_id: parseInt(document.getElementById('pStud').value),
+        amount:     parseFloat(document.getElementById('pAmt').value),
+        month:      document.getElementById('pMonth').value,
+        method:     document.getElementById('pMethod').value
+      })});
+      closeModal(); loadPage('payments');
+    }
+  );
+}
+
+// Attendance
+async function loadAttendance(el) {
+  if (userRole === 'student') {
+    try {
+      const d = await apiFetch('/api/students/my-attendance');
+      el.innerHTML = `
+        <div class="stat-grid">
+          <div class="stat-card green"><div class="stat-num">${d.percent}%</div><div class="stat-label">Davomat foizi</div></div>
+          <div class="stat-card purple"><div class="stat-num">${d.present}</div><div class="stat-label">Kelgan</div></div>
+          <div class="stat-card red"><div class="stat-num">${d.total - d.present}</div><div class="stat-label">Kelmagan</div></div>
+        </div>
+        <div class="table-wrap"><div class="table-head"><h3>Davomat tarixi</h3></div>
+        <table><thead><tr><th>Sana</th><th>Holat</th><th>Guruh ID</th></tr></thead>
+        <tbody>${d.records.map(r=>`<tr><td>${r.date}</td>
+          <td><span class="badge ${r.status==='present'?'badge-green':r.status==='late'?'badge-yellow':'badge-red'}">${r.status}</span></td>
+          <td>#${r.group_id}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+    return;
+  }
+  el.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-head"><h3>Davomat belgilash</h3>
+        <button class="btn btn-primary btn-sm" onclick="openMarkAttendance()">+ Belgilash</button>
+      </div>
+      <p style="padding:20px;color:var(--muted);font-size:.85rem">Guruh tanlang va davomat belgilang.</p>
+    </div>`;
+}
+
+function openMarkAttendance() {
+  const today = new Date().toISOString().slice(0,10);
+  openModal("Davomat belgilash",
+    `<div class="form-group"><label>Student ID</label><input type="number" id="aStud" placeholder="1"/></div>
+     <div class="form-group"><label>Guruh ID</label><input type="number" id="aGroup" placeholder="1"/></div>
+     <div class="form-group"><label>Sana</label><input id="aDate" value="${today}"/></div>
+     <div class="form-group"><label>Holat</label>
+       <select id="aStatus"><option value="present">Keldi</option><option value="absent">Kelmadi</option><option value="late">Kech keldi</option></select>
+     </div>`,
+    async () => {
+      await apiFetch('/api/teachers/attendance', {method:'POST', body: JSON.stringify({
+        student_id: parseInt(document.getElementById('aStud').value),
+        group_id:   parseInt(document.getElementById('aGroup').value),
+        date:       document.getElementById('aDate').value,
+        status:     document.getElementById('aStatus').value
+      })});
+      closeModal();
+    }
+  );
+}
+
+// Grades
+async function loadGrades(el) {
+  if (userRole === 'student') {
+    try {
+      const list = await apiFetch('/api/students/my-grades');
+      el.innerHTML = `<div class="table-wrap">
+        <div class="table-head"><h3>Baholarim</h3></div>
+        <table><thead><tr><th>Ball</th><th>Tur</th><th>Izoh</th><th>Guruh</th></tr></thead>
+        <tbody>${list.map(g=>`<tr><td><b>${g.score}</b></td><td>${g.type}</td><td>${g.comment||'-'}</td><td>#${g.group_id}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+    return;
+  }
+  el.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-head"><h3>Baho qo'shish</h3>
+        <button class="btn btn-primary btn-sm" onclick="openAddGrade()">+ Baho</button>
+      </div>
+      <p style="padding:20px;color:var(--muted);font-size:.85rem">Studentga baho qo'shing.</p>
+    </div>`;
+}
+
+function openAddGrade() {
+  openModal("Baho qo'shish",
+    `<div class="form-group"><label>Student ID</label><input type="number" id="grStud" placeholder="1"/></div>
+     <div class="form-group"><label>Guruh ID</label><input type="number" id="grGroup" placeholder="1"/></div>
+     <div class="form-group"><label>Ball (0-100)</label><input type="number" id="grScore" placeholder="85"/></div>
+     <div class="form-group"><label>Tur</label>
+       <select id="grType"><option>baho</option><option>test</option><option>vazifa</option></select>
+     </div>
+     <div class="form-group"><label>Izoh</label><input id="grComment" placeholder="Ixtiyoriy"/></div>`,
+    async () => {
+      await apiFetch('/api/teachers/grade', {method:'POST', body: JSON.stringify({
+        student_id: parseInt(document.getElementById('grStud').value),
+        group_id:   parseInt(document.getElementById('grGroup').value),
+        score:      parseFloat(document.getElementById('grScore').value),
+        type:       document.getElementById('grType').value,
+        comment:    document.getElementById('grComment').value || null
+      })});
+      closeModal();
+    }
+  );
+}
+
+// Notifications
+async function loadNotifications(el) {
+  try {
+    const list = await apiFetch('/api/notifications/my');
+    el.innerHTML = `
+      <div class="table-wrap">
+        <div class="table-head"><h3>Bildirishnomalar</h3>
+          ${userRole !== 'student' ? `<button class="btn btn-primary btn-sm" onclick="openSendNotif()">+ Yuborish</button>` : ''}
+        </div>
+        ${list.length === 0 ? `<p style="padding:20px;color:var(--muted)">Bildirishnomalar yo'q</p>` :
+        `<table><thead><tr><th>Sarlavha</th><th>Xabar</th><th>Tur</th><th>Holat</th></tr></thead>
+        <tbody>${list.map(n=>`<tr>
+          <td>${n.title}</td><td>${n.message}</td>
+          <td><span class="badge badge-yellow">${n.type}</span></td>
+          <td><span class="badge ${n.is_read?'badge-green':'badge-red'}">${n.is_read?'O\'qildi':'Yangi'}</span></td>
+        </tr>`).join('')}</tbody></table>`}
+      </div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+}
+
+function openSendNotif() {
+  openModal("Bildirishnoma yuborish",
+    `<div class="form-group"><label>Sarlavha</label><input id="nTitle" placeholder="Muhim xabar"/></div>
+     <div class="form-group"><label>Xabar</label><input id="nMsg" placeholder="Kurs narxi o'zgardi..."/></div>
+     <div class="form-group"><label>Tur</label>
+       <select id="nType"><option>info</option><option>warning</option><option>payment</option></select>
+     </div>`,
+    async () => {
+      await apiFetch('/api/notifications/send', {method:'POST', body: JSON.stringify({
+        title:   document.getElementById('nTitle').value,
+        message: document.getElementById('nMsg').value,
+        type:    document.getElementById('nType').value
+      })});
+      closeModal(); loadPage('notifications');
+    }
+  );
+}
+
+// Profile (student)
+async function loadProfile(el) {
+  try {
+    const d = await apiFetch('/api/students/my-profile');
+    const r = await apiFetch('/api/students/my-rating');
+    el.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-card purple"><div class="stat-num">${r.total_bonus}</div><div class="stat-label">Jami bonus</div></div>
+        <div class="stat-card red"><div class="stat-num">${r.total_jarima}</div><div class="stat-label">Jami jarima</div></div>
+        <div class="stat-card gold"><div class="stat-num">${r.net_rating}</div><div class="stat-label">Reyting balli</div></div>
+      </div>
+      <div class="table-wrap"><div class="table-head"><h3>Profil ma'lumotlari</h3></div>
+        <table><tbody>
+          <tr><td>Ism</td><td>${d.full_name}</td></tr>
+          <tr><td>Telefon</td><td>${d.phone}</td></tr>
+          <tr><td>Guruhlar</td><td>${d.groups.map(g=>'#'+g).join(', ')||'—'}</td></tr>
+        </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--muted)">${e.message}</p>`; }
+}
+
+// ── MODAL ────────────────────────────────────────
+function openModal(title, body, confirmFn) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  modalConfirmFn = confirmFn;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+async function modalConfirm() {
+  if (modalConfirmFn) {
+    try { await modalConfirmFn(); }
+    catch(e) { alert(e.message); }
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
