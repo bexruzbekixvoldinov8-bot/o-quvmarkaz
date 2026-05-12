@@ -78,3 +78,4 @@ http://localhost:8000/redoc      # ReDoc
 - **Auth**: JWT (python-jose)
 - **Frontend**: HTML + CSS + Vanilla JS (single page)
 - **Server**: Uvicorn (ASGI)
+# o-quvmarkaz
